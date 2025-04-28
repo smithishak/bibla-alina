@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в систему</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <h1>Вход в систему</h1>
+        <form id="loginForm" class="login-form">
+            <input type="text" id="username" placeholder="Логин" required>
+            <input type="password" id="password" placeholder="Пароль" required>
+            <button type="submit">Войти</button>
+        </form>
+        <div id="loginError" class="error-message"></div>
+    </div>
+
+    <script>
+        // Если пользователь уже авторизован, перенаправляем его
+        const token = localStorage.getItem('token');
+        const isAdmin = localStorage.getItem('isAdmin') === 'true';
+        
+        if (token) {
+            window.location.replace(isAdmin ? '/' : '/catalog.html');
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: document.getElementById('username').value,
+                        password: document.getElementById('password').value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('isAdmin', data.isAdmin);
+                    window.location.replace(data.isAdmin ? '/' : '/catalog.html');
+                } else {
+                    const errorDiv = document.getElementById('loginError');
+                    errorDiv.textContent = data.message || 'Ошибка входа';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                document.getElementById('loginError').textContent = 'Ошибка сервера';
+            }
+        });
+    </script>
+</body>
+</html>

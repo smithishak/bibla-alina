@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали книги</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-content">
+            <div class="left-section">
+                <a href="/" class="site-title">Библиотека</a>
+                <nav class="desktop-nav">
+                    <a href="/" class="nav-link">Книги</a>
+                    <a href="/profile.html" class="nav-link">Профиль</a>
+                    <a href="/register.html" class="nav-link admin-only">Пользователи</a>
+                </nav>
+            </div>
+            <button class="menu-button">☰</button>
+            <div class="user-panel">
+                <span id="userRole" class="user-role"></span>
+                <button class="logout-btn" onclick="handleLogout()">Выйти</button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="mobile-menu" id="mobileMenu">
+        <nav class="mobile-nav">
+            <a href="/" class="nav-link">Книги</a>
+            <a href="/profile.html" class="nav-link">Профиль</a>
+            <a href="/register.html" class="nav-link admin-only">Пользователи</a>
+        </nav>
+        <div class="user-panel">
+            <span id="userRoleMobile" class="user-role"></span>
+            <button class="logout-btn" onclick="handleLogout()">Выйти</button>
+        </div>
+    </div>
+    
+    <main>: 
+        <div id="bookDetails" class="book-detail-card">
+            <!-- Здесь будут отображаться детали книги -->
+        </div>
+    </main>
+    
+    <script src="js/navigation.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/book-details.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            const isAdmin = localStorage.getItem('isAdmin') === 'true';
+            document.querySelectorAll('.admin-only').forEach(element => {
+                element.style.display = isAdmin ? 'inline-block' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

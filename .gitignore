@@ -1,0 +1,4 @@
+public/uploads/pdfs/*
+public/uploads/temp/*
+!public/uploads/pdfs/.gitkeep
+!public/uploads/temp/.gitkeep

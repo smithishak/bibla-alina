@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <h1>Регистрация</h1>
+        <form id="registerForm" class="login-form">
+            <input type="text" id="fullName" placeholder="ФИО" required>
+            <input type="text" id="class" placeholder="Класс" required>
+            <input type="text" id="username" placeholder="Логин" required>
+            <input type="password" id="password" placeholder="Пароль" required>
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+        <div id="registerError" class="error-message"></div>
+        <p class="login-link">
+            Уже есть аккаунт? <a href="/login.html">Войти</a>
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                fullName: document.getElementById('fullName').value,
+                class: document.getElementById('class').value,
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            };
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('isAdmin', data.isAdmin);
+                    window.location.href = '/catalog.html';
+                } else {
+                    const errorDiv = document.getElementById('registerError');
+                    errorDiv.textContent = data.message || 'Ошибка при регистрации';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                document.getElementById('registerError').textContent = 'Ошибка сервера';
+            }
+        });
+    </script>
+</body>
+</html>

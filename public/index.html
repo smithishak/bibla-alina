@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Библиотека</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-content">
+            <div class="left-section">
+                <a href="/" class="site-title">Библиотека</a>
+                <nav class="desktop-nav">
+                    <a href="/" class="nav-link active">Книги</a>
+                    <a href="/users.html" class="nav-link admin-only">Пользователи</a>
+                </nav>
+            </div>
+            <button class="menu-button">☰</button>
+            <div class="user-panel">
+                <span id="userRole" class="user-role"></span>
+                <button class="logout-btn" onclick="handleLogout()">Выйти</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <nav class="mobile-nav">
+            <a href="/" class="nav-link active">Книги</a>
+            <a href="/users.html" class="nav-link admin-only">Пользователи</a>
+        </nav>
+        <div class="user-panel">
+            <span id="userRoleMobile" class="user-role"></span>
+            <button class="logout-btn" onclick="handleLogout()">Выйти</button>
+        </div>
+    </div>
+    
+    <main id="mainContent">
+        <section class="book-form admin-only">
+            <h2>Добавить книгу</h2>
+            <form id="addBookForm" enctype="multipart/form-data">
+                <input type="text" name="title" placeholder="Название книги" required>
+                <input type="text" name="author" placeholder="Автор" required>
+                <input type="number" name="year" placeholder="Год издания">
+                <input type="text" name="genre" placeholder="Жанр">
+                <input type="number" name="quantity" placeholder="Количество" value="1" min="1">
+                <div class="file-inputs">
+                    <input type="file" name="image" accept="image/*" id="imageInput">
+                    <label for="imageInput">Выберите изображение</label>
+                    
+                    <input type="file" name="pdf" accept="application/pdf" id="pdfInput">
+                    <label for="pdfInput">Выберите PDF файл</label>
+                </div>
+                <button type="submit">Добавить книгу</button>
+            </form>
+            <div id="uploadMessage"></div>
+        </section>
+
+        <section class="books-list">
+            <div class="books-header">
+                <h2>Список книг</h2>
+                <div class="search-form">
+                    <input type="text" id="searchInput" placeholder="Поиск по названию или автору...">
+                    <button onclick="handleSearch()">Поиск</button>
+                </div>
+            </div>
+            <div id="booksList"></div>
+            <div id="pagination" class="pagination"></div>
+        </section>
+    </main>
+
+    <script src="js/navigation.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Проверяем авторизацию при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            const isAdmin = localStorage.getItem('isAdmin') === 'true';
+            const roleText = `Роль: ${isAdmin ? 'Администратор' : 'Студент'}`;
+            document.getElementById('userRole').textContent = roleText;
+            document.getElementById('userRoleMobile').textContent = roleText;
+            
+            // Показываем/скрываем элементы управления
+            const bookForm = document.querySelector('.book-form');
+            if (bookForm) {
+                bookForm.style.display = isAdmin ? 'block' : 'none';
+            }
+        });
+
+        document.getElementById('addBookForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch('/api/books', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('uploadMessage').innerHTML = 'Книга успешно добавлена!';
+                    e.target.reset();
+                    // Перезагрузить список книг
+                    loadBooks();
+                } else {
+                    const error = await response.json();
+                    document.getElementById('uploadMessage').innerHTML = `Ошибка: ${error.message}`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('uploadMessage').innerHTML = 'Ошибка при загрузке книги';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Book Upload</title>
+</head>
+<body>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="text" name="title" placeholder="Book Title" required><br>
+        <input type="text" name="author" placeholder="Author" required><br>
+        <input type="number" name="year" placeholder="Year"><br>
+        <input type="text" name="genre" placeholder="Genre"><br>
+        <input type="number" name="quantity" placeholder="Quantity" value="1"><br>
+        <input type="file" name="image" accept="image/*"><br>
+        <input type="file" name="pdf" accept="application/pdf"><br>
+        <button type="submit">Upload Book</button>
+    </form>
+
+    <div id="message"></div>
+
+    <script>
+        // Check authentication before showing form
+        const token = localStorage.getItem('token');
+        const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
+        if (!token || !isAdmin) {
+            window.location.replace('/login.html');
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch('/api/books', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('message').innerHTML = 'Книга успешно загружена!';
+                    // Clear form
+                    e.target.reset();
+                } else {
+                    const error = await response.json();
+                    document.getElementById('message').innerHTML = `Ошибка: ${error.message}`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('message').innerHTML = 'Ошибка при загрузке книги';
+            }
+        });
+    </script>
+</body>
+</html>
